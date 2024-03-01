@@ -1,0 +1,41 @@
+<template>
+    <lightning-card>
+        <lightning-tabset>
+            <lightning-tab label="Gallery">
+                <lightning-layout class="slds-p-horizontal_small">
+                    <template lwc:if={isLoading}>
+                        <div class="box_Loading">
+                            <lightning-spinner alternative-text="Loading" size="x-small"></lightning-spinner>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <template for:each={listBoat} for:item="boat">
+                            <lightning-layout-item key={boat.Id} size="3">
+                                <div class="item">
+                                    <div class="box_image">
+                                        <img class="image" src={boat.Picture__c} alt={boat.Name}>
+                                    </div>
+
+                                    <span class="slds-p-top_small">{boat.Name}</span>
+                                    <span>Price: {boat.Price__c}</span>
+                                    <span>type: {boat.Boat_Type__r.Name} </span>
+                                </div>
+                            </lightning-layout-item>
+                        </template>
+                    </template>
+                </lightning-layout>
+            </lightning-tab>
+            <lightning-tab label="Boat Editor">
+                <lightning-layout class="slds-p-horizontal_small">
+                    <lightning-datatable
+                        key-field="id"
+                        data={listBoat}
+                        columns={columns}>
+                    </lightning-datatable>
+                </lightning-layout>
+            </lightning-tab>
+            <lightning-tab label="Boats Near Me">
+            </lightning-tab>
+        </lightning-tabset>
+    </lightning-card>
+</template>
