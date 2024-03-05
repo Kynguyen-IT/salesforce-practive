@@ -1,0 +1,11 @@
+<template>
+  <div class={computeClass} onclick={handleOnClickItem}>
+    <div class="box_image">
+      <img class="image" src={boatData.Picture__c} alt={boatData.Name} />
+    </div>
+
+    <span class="slds-p-top_small">{boatData.Name}</span>
+    <span>Price: {boatData.Price__c}</span>
+    <span>type: {boatData.Boat_Type__r.Name} </span>
+  </div>
+</template>

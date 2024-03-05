@@ -7,5 +7,5 @@
         <description>This is the record Id that changed</description>
         <fieldName>recordId</fieldName>
     </lightningMessageFields>
-    <masterLabel>BoatMessageChannels</masterLabel>
+    <masterLabel>BoatMessageChannel</masterLabel>
 </LightningMessageChannel>
