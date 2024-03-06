@@ -1,0 +1,40 @@
+<template>
+  <lightning-card title={getTitle} icon-name="custom:custom54">
+    <lightning-layout multiple-rows="true">
+      <template if:true={noBoats}>
+        <p class="slds-align_absolute-center">
+          There are no related boats by type!
+        </p>
+      </template>
+
+      <lightning-layout-item class="slds-align-middle">
+        <lightning-combobox
+          name="progress"
+          value={selectedBoatTypeId}
+          placeholder="Select Progress"
+          options={searchOptions}
+          onchange={handleSearchOptionChange}
+        ></lightning-combobox>
+      </lightning-layout-item>
+      <!-- Loop through the list of similar boats -->
+      <template if:false={noBoats}>
+        <lightning-layout multiple-rows>
+          <template for:each={relatedBoats} for:item="boatData">
+            <lightning-layout-item
+              key={boatData.Id}
+              size="12"
+              small-device-size="6"
+              medium-device-size="4"
+              large-device-size="3"
+            >
+              <c-boat-tile
+                boat-data={boatData}
+                selected-boat-id={selectedBoatId}
+              ></c-boat-tile>
+            </lightning-layout-item>
+          </template>
+        </lightning-layout>
+      </template>
+    </lightning-layout>
+  </lightning-card>
+</template>

@@ -5,12 +5,7 @@ import DESCRIPTION_FIELD from "@salesforce/schema/Boat__c.Description__c";
 import LENGTH_FIELD from "@salesforce/schema/Boat__c.Length__c";
 import NAME_FIELD from "@salesforce/schema/Boat__c.Name";
 import PRICE_FIELD from "@salesforce/schema/Boat__c.Price__c";
-import {
-  APPLICATION_SCOPE,
-  MessageContext,
-  subscribe,
-  unsubscribe
-} from "lightning/messageService";
+import { MessageContext, publish } from "lightning/messageService";
 import { LightningElement, api, track, wire } from "lwc";
 
 const COLUMNS = [
@@ -52,23 +47,8 @@ export default class BoatSearchResults extends LightningElement {
   @track draftValues = [];
   selectedBoatId;
 
-  handleMessage(message) {
-    this.selectedBoatId = message.recordId;
-  }
-
-  unsubscribeToMessageChannel() {
-    unsubscribe(this.subscription);
-    this.subscription = null;
-  }
-
-  connectedCallback() {
-    this.handleloading();
-    this.subscribeToMessageChannel();
-  }
-
-  disconnectedCallback() {
-    this.unsubscribeToMessageChannel();
-  }
+  @wire(MessageContext)
+  messageContext;
 
   async handleSave(event) {
     const recordInputs = event.detail.draftValues.map((draft) => {
@@ -77,7 +57,21 @@ export default class BoatSearchResults extends LightningElement {
       const boats = this.listBoat;
       delete draft.id;
 
-      return { ...boats[boatIndex], ...draft };
+      const length =
+        typeof draft?.Length__c === "string"
+          ? Number(draft?.Length__c)
+          : draft?.Length__c;
+
+      const price =
+        typeof draft?.Price__c === "string"
+          ? Number(draft?.Price__c)
+          : draft?.Price__c;
+
+      return {
+        ...boats[boatIndex],
+        ...draft,
+        ...{ Length__c: length, Price__c: price }
+      };
     });
 
     const promises = recordInputs.map((recordInput) =>
@@ -112,16 +106,12 @@ export default class BoatSearchResults extends LightningElement {
     }, 500);
   }
 
-  @wire(MessageContext)
-  messageContext;
-  subscribeToMessageChannel() {
-    if (!this.subscription) {
-      this.subscription = subscribe(
-        this.messageContext,
-        BOATMC,
-        (message) => this.handleMessage(message),
-        { scope: APPLICATION_SCOPE }
-      );
-    }
+  updateSelectedTile(event) {
+    this.selectedBoatId = event.detail.boatId;
+    this.sendMessageService(this.selectedBoatId);
+  }
+
+  sendMessageService(boatId) {
+    publish(this.messageContext, BOATMC, { recordId: boatId });
   }
 }

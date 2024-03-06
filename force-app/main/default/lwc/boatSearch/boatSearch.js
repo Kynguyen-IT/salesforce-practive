@@ -1,5 +1,6 @@
 import BOATMC from "@salesforce/messageChannel/Boat_Message_Channel__c";
 import { MessageContext, publish } from "lightning/messageService";
+import { NavigationMixin } from "lightning/navigation";
 import { LightningElement, track, wire } from "lwc";
 
 export default class BoatSearch extends LightningElement {
@@ -27,5 +28,13 @@ export default class BoatSearch extends LightningElement {
     publish(this.messageContext, BOATMC, { recordId: null });
   }
 
-  createNewBoat() {}
+  createNewBoat() {
+    this[NavigationMixin.Navigate]({
+      type: "standard__objectPage",
+      attributes: {
+        objectApiName: "Boat__c",
+        actionName: "new"
+      }
+    });
+  }
 }

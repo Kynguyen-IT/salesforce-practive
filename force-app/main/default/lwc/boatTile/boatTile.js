@@ -1,22 +1,31 @@
-import BOATMC from "@salesforce/messageChannel/Boat_Message_Channel__c";
-import { MessageContext, publish } from "lightning/messageService";
-import { LightningElement, api, wire } from "lwc";
+import { LightningElement, api } from "lwc";
+
+const TILE_WRAPPER_SELECTED_CLASS = "tile-wrapper selected";
+const TILE_WRAPPER_UNSELECTED_CLASS = "tile-wrapper";
 
 export default class BoatTile extends LightningElement {
-  @api boatData;
+  @api boat;
   @api selectedBoatId;
 
-  get computeClass() {
-    return this.selectedBoatId === this.boatData.Id ? "item selected" : "item";
+  get backgroundStyle() {
+    return "background-image:url(" + this.boat.Picture__c + ")";
   }
 
-  @wire(MessageContext)
-  messageContext;
-  handleOnClickItem() {
-    const Id = this.boatData.Id;
-    const payload = {
-      recordId: !this.selectedBoatId || this.selectedBoatId !== Id ? Id : null
-    };
-    publish(this.messageContext, BOATMC, payload);
+  get tileClass() {
+    if (this.boat.Id === this.selectedBoatId) {
+      return TILE_WRAPPER_SELECTED_CLASS;
+    }
+    return TILE_WRAPPER_UNSELECTED_CLASS;
+  }
+
+  selectBoat() {
+    // eslint-disable-next-line @lwc/lwc/no-api-reassignments
+    this.selectedBoatId = this.boat.Id;
+    const boatselect = new CustomEvent("boatselect", {
+      detail: {
+        boatId: this.selectedBoatId
+      }
+    });
+    this.dispatchEvent(boatselect);
   }
 }

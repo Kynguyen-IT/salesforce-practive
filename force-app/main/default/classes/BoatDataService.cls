@@ -1,4 +1,51 @@
 public with sharing class BoatDataService {
+  @AuraEnabled
+  public static List<BoatReview__c> getAllReviews(Id boatId) {
+    return [
+      SELECT
+        Id,
+        Name,
+        Comment__c,
+        Rating__c,
+        LastModifiedDate,
+        CreatedDate,
+        CreatedBy.Name,
+        CreatedBy.SmallPhotoUrl,
+        CreatedBy.CompanyName
+      FROM BoatReview__c
+      WHERE Boat__c = :boatId
+      WITH SECURITY_ENFORCED
+      ORDER BY CreatedDate DESC
+    ];
+  }
+
+  // Assume this may be an API that return this data, not a SOQL query
+  @AuraEnabled(cacheable=true)
+  public static String getBoatsByLocation(
+    Decimal latitude,
+    Decimal longitude,
+    String boatTypeId
+  ) {
+    // Without an explicit boatTypeId, the full list is desired
+    String query = 'SELECT Name, Geolocation__Latitude__s, Geolocation__Longitude__s FROM Boat__c ';
+    if (String.isNotBlank(boatTypeId)) {
+      query += 'WHERE BoatType__c = :boatTypeId ';
+    }
+    query += ' WITH SECURITY_ENFORCED ORDER BY DISTANCE(Geolocation__c, GEOLOCATION(:latitude, :longitude), \'mi\') LIMIT 10';
+    return JSON.serialize(Database.query(query));
+  }
+
+  @AuraEnabled
+  public static String updateBoatList(Object data) {
+    List<Boat__c> boatsForUpdate = (List<Boat__c>) JSON.deserialize(
+      JSON.serialize(data),
+      List<Boat__c>.class
+    );
+
+    update boatsForUpdate;
+    return 'Success: Boats updated successfully';
+  }
+
   @AuraEnabled(cacheable=true)
   public static List<Boat__c> getBoats(String boatTypeId) {
     return boatTypeId != ''
@@ -12,6 +59,7 @@ public with sharing class BoatDataService {
             Picture__c,
             Price__c,
             Year__c,
+            Contact__r.Name,
             Boat_Type__r.Name,
             Boat_Type__r.Id
           FROM Boat__c
@@ -27,12 +75,14 @@ public with sharing class BoatDataService {
             Picture__c,
             Price__c,
             Year__c,
+            Contact__r.Name,
             Boat_Type__r.Name,
             Boat_Type__r.Id
           FROM Boat__c
         ];
   }
 
+  @AuraEnabled(cacheable=true)
   public static List<Boat__c> getSimilarBoats() {
     return [
       SELECT
@@ -44,13 +94,15 @@ public with sharing class BoatDataService {
         Picture__c,
         Price__c,
         Year__c,
+        Contact__r.Name,
         Boat_Type__r.Name,
         Boat_Type__r.Id
       FROM Boat__c
     ];
   }
 
-  public static List<Boat_Type__c> getBoatType() {
+  @AuraEnabled(cacheable=true)
+  public static List<Boat_Type__c> getBoatTypes() {
     return [
       SELECT Name, Id
       FROM Boat_Type__c

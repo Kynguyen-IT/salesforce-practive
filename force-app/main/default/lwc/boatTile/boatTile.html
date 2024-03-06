@@ -1,11 +1,28 @@
 <template>
-  <div class={computeClass} onclick={handleOnClickItem}>
-    <div class="box_image">
-      <img class="image" src={boatData.Picture__c} alt={boatData.Name} />
-    </div>
+  <div onclick={selectBoat} class={tileClass}>
+    <div style={backgroundStyle} class="tile"></div>
 
-    <span class="slds-p-top_small">{boatData.Name}</span>
-    <span>Price: {boatData.Price__c}</span>
-    <span>type: {boatData.Boat_Type__r.Name} </span>
+    <div class="lower-third">
+      <h1 class="slds-truncate slds-text-heading_medium">{boat.Name}</h1>
+
+      <h2 class="slds-truncate slds-text-heading_small">
+        {boat.Contact__r.Name}
+      </h2>
+
+      <div class="slds-text-body_small">
+        Price:
+        <lightning-formatted-number
+          maximum-fraction-digits="2"
+          format-style="currency"
+          currency-code="USD"
+          value={boat.Price__c}
+        >
+        </lightning-formatted-number>
+      </div>
+
+      <div class="slds-text-body_small">Length: {boat.Length__c}</div>
+
+      <div class="slds-text-body_small">Type: {boat.Boat_Type__r.Name}</div>
+    </div>
   </div>
 </template>
